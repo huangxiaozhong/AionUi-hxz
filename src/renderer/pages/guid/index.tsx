@@ -74,13 +74,16 @@ const Guid: React.FC = () => {
       input:
         files.length > 0
           ? files
-              .map((v) => v.split('/').pop())
+              .map((v) => v.split(/[\\/]/).pop() || '')
               .map((v) => `@${v}`)
-              .join(' ') + input
+              .join(' ') +
+            ' ' +
+            input
           : input,
       conversation_id: conversation.id,
       msg_id: uuid(),
     });
+
     navigate(`/conversation/${conversation.id}`);
   };
   const sendMessageHandler = () => {
@@ -95,8 +98,9 @@ const Guid: React.FC = () => {
   const setDefaultModel = async () => {
     const useModel = await ConfigStorage.get('gemini.defaultModel');
     const defaultModel = modelList.find((m) => m.model.includes(useModel)) || modelList[0];
+    console.log('----->defaultModel', useModel);
     if (!defaultModel) return;
-    setCurrentModel({ ...defaultModel, useModel: defaultModel.model.find((m) => m == useModel) || defaultModel.model[0] });
+    _setCurrentModel({ ...defaultModel, useModel: defaultModel.model.find((m) => m == useModel) || defaultModel.model[0] });
   };
   useEffect(() => {
     setDefaultModel();
