@@ -17,7 +17,7 @@ on:
   workflow_dispatch:
     inputs:
       pr_number:
-        description: 'PR number  to review'
+        description: 'PR number to review'
         required: true
         type: 'number'
 
@@ -38,6 +38,9 @@ permissions:
 
 jobs:
   review-pr:
+    # This condition seeks to ensure the action is only run when it is triggered by a trusted user.
+    # For private repos, users who have access to the repo are considered trusted.
+    # For public repos, users who members, owners, or collaborators are considered trusted.
     # 此条件旨在确保仅当操作由可信用户触发时，才会执行该工作流。
     # 对于私有仓库，能够访问该仓库的用户即被视为可信用户。
     # 对于公共仓库，仓库的所有者（owners）、成员（members）或协作者（collaborators）被视为可信用户。
@@ -86,14 +89,6 @@ jobs:
         with:
           app-id: '${{ vars.APP_ID }}'
           private-key: '${{ secrets.APP_PRIVATE_KEY }}'
-
-      - name: 'Authenticate to Google Cloud'
-        id: 'auth'
-        uses: 'google-github-actions/auth@v2'
-        with:
-          workload_identity_provider: '${{ vars.GCP_WIF_PROVIDER }}'
-          service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
-          project_id: '${{ vars.GOOGLE_CLOUD_PROJECT }}'
 
       - name: 'Get PR details (pull_request & workflow_dispatch)'
         id: 'get_pr'
@@ -175,6 +170,7 @@ jobs:
           gcp_project_id: '${{ vars.GOOGLE_CLOUD_PROJECT }}'
           gcp_location: '${{ vars.GOOGLE_CLOUD_LOCATION }}'
           gcp_service_account: '${{ vars.SERVICE_ACCOUNT_EMAIL }}'
+          gemini_api_key: '${{ secrets.GEMINI_API_KEY }}'
           use_vertex_ai: '${{ vars.GOOGLE_GENAI_USE_VERTEXAI }}'
           use_gemini_code_assist: '${{ vars.GOOGLE_GENAI_USE_GCA }}'
           settings: |-
